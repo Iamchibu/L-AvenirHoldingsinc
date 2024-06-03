@@ -9,6 +9,7 @@ def get_base64(bin_file):
         data = f.read()
     return base64.b64encode(data).decode()
 
+# Set background image
 def set_background(png_file):
     bin_str = get_base64(png_file)
     page_bg_img = '''
@@ -144,7 +145,7 @@ with tab1:
     st.write(f'Min Price: {selected_price[0]:,} - Max Price: {selected_price[1]:,}')
 
     st.title('Filtered Data')
-    st.write(filtered_data.T)
+    st.dataframe(filtered_data.T, width=1000, height=600)
 
 with tab2:
     st.subheader("What do you want to search today?")
@@ -181,7 +182,7 @@ with tab2:
 
     if display_data:
         st.title('Filtered Data')
-        st.write(filtered_data.T)
+        st.dataframe(filtered_data.T, width=1000, height=600)
 
 with tab3:
     st.subheader("Predicted Buyers for 2024")
@@ -216,7 +217,7 @@ with tab3:
                     longitude = float(row['lng'].split(',')[0].strip())  # Extract longitude and convert to float
                     map_data = pd.DataFrame([[latitude, longitude]], columns=['latitude', 'longitude'])
                     st.map(map_data, zoom=8)
-                    st.write(row)
+                    st.dataframe(row, width=1000, height=600)
                 else:
                     # Display the data horizontally
                     for index, row in reduced_data.iterrows():
@@ -229,7 +230,7 @@ with tab3:
                             st.map(map_data, zoom=8)
                             
                         with pcol2:
-                            st.write(row)
+                            st.dataframe(row, width=600, height=400)
 
 with tab4:
     st.header("Settings")
