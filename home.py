@@ -1,3 +1,18 @@
+# def main():
+#     st.write("# Home Page")
+    
+#     # Get the query parameters
+#     query_params = st.query_params()
+    
+#     # Check if the 'authenticated' parameter is present and set to 'true'
+#     if 'authenticated' in query_params and query_params['authenticated'][0] == 'true':
+#         st.success("Login Successful")
+#     else:
+#         st.warning("Login failed")
+
+# if _name_ == "_main_":
+#     main()
+
 import streamlit as st
 import pandas as pd
 import geopandas as gpd
@@ -26,7 +41,7 @@ set_background('./images/background.png')
 
 st.title("L'Avenir Holdings inc Dashboard")
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["HOME", "HISTORY", "2024 PREDICTED BUYERS", "SETTINGS", "ABOUT"])
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["HOME", "VIEW", "HISTORY", "2024 PREDICTED BUYERS", "SETTINGS", "ABOUT"])
 
 @st.cache_data
 def load_data(file):
@@ -60,6 +75,7 @@ def get_slider_ranges(data, column_name):
     max_value = numeric_data.max()
     return (int(min_value), int(max_value))
 
+st.logo("images/lavenir.PNG")
 # Initialize session state for data file selection
 if 'data_file' not in st.session_state:
     st.session_state['data_file'] = 'merged_df.xlsx'
@@ -88,6 +104,26 @@ def clean_coordinate_column(series):
     return series
 
 with tab1:
+    # data = data.dropna(subset=['lat', 'lng', 'Situs Zip Code', 'Last Sale Date', 'Prior Sale Date', 'Year Built'])
+    
+    col1, col2 = st.columns(2)
+
+    with col1:
+        state = ["FL","MA"]
+        selected_buyer = st.selectbox('State', ['All'] + state)
+
+    with col2:
+        county = ["Sarasota","Sulffolk", "Nor"]
+        selected_neighborhood = st.selectbox('County/Township', ['All'] + county)
+        agree = st.checkbox("I agree")
+
+if agree:
+    st.write("Great!")
+
+    # st.checkbox(label, value=False, key=None, help=None, on_change=None, args=None, kwargs=None, *, disabled=False, label_visibility="visible")
+
+
+with tab2:
     data = data.dropna(subset=['lat', 'lng', 'Situs Zip Code', 'Last Sale Date', 'Prior Sale Date', 'Year Built'])
     
     # Clean date strings before converting to datetime
@@ -147,7 +183,7 @@ with tab1:
     st.title('Filtered Data')
     st.dataframe(filtered_data.T, width=1000, height=600)
 
-with tab2:
+with tab3:
     st.subheader("What do you want to search today?")
     filter_options = ["Buyers", "Years", "Price", neighborhood_column]
     selected_filter = st.radio("Select a filter option:", filter_options, horizontal=True)
@@ -184,55 +220,55 @@ with tab2:
         st.title('Filtered Data')
         st.dataframe(filtered_data.T, width=1000, height=600)
 
-with tab3:
+with tab4:
     st.subheader("Predicted Buyers for 2024")
 
-    if st.session_state['data_file'] != 'all_predicted_buyers_2024_details.xlsx':
-        st.warning("Please switch to the reduced data file in the Settings tab to use this feature.")
-    else:
-        reduced_data = load_data('all_predicted_buyers_2024_details.xlsx')
+    # if st.session_state['data_file'] != 'all_2024_details.xlsx':
+    #     st.warning("Please switch to the reduced data file in the Settings tab to use this feature.")
+    # else:
+    reduced_data = load_data('all_2024_details.xlsx')
 
-        owners = reduced_data['Owner'].unique().tolist() if 'Owner' in reduced_data.columns else []
-        types = reduced_data['Type'].dropna().unique().tolist() if 'Type' in reduced_data.columns else []
+    owners = reduced_data['Owner'].unique().tolist() if 'Owner' in reduced_data.columns else []
+    types = reduced_data['Type'].dropna().unique().tolist() if 'Type' in reduced_data.columns else []
 
-        selected_owner = st.selectbox('Owner', ['All'] + owners)
-        selected_type = st.selectbox('Type', ['All'] + types)
+    selected_owner = st.selectbox('Owner', ['All'] + owners)
+    selected_type = st.selectbox('Type', ['All'] + types)
 
-        if 'Owner' in reduced_data.columns and 'Type' in reduced_data.columns:
-            if selected_owner != 'All':
-                reduced_data = reduced_data[reduced_data['Owner'] == selected_owner]
-            if selected_type != 'All':
-                reduced_data = reduced_data[reduced_data['Type'] == selected_type]
+    if 'Owner' in reduced_data.columns and 'Type' in reduced_data.columns:
+        if selected_owner != 'All':
+            reduced_data = reduced_data[reduced_data['Owner'] == selected_owner]
+        if selected_type != 'All':
+            reduced_data = reduced_data[reduced_data['Type'] == selected_type]
 
-            st.title('Filtered Data')
+        st.title('Filtered Data')
 
-            # Check if both owner and type are "All"
-            if selected_owner == 'All' and selected_type == 'All':
-                st.warning("Please select to see predicted buyers")  # Display all data
+        # Check if both owner and type are "All"
+        if selected_owner == 'All' and selected_type == 'All':
+            st.warning("Please select to see predicted buyers")  # Display all data
+        else:
+            if reduced_data.shape[0] == 1:
+                # Display the map and data vertically
+                row = reduced_data.iloc[0]
+                latitude = float(row['lat'].split(',')[0].strip())  # Extract latitude and convert to float
+                longitude = float(row['lng'].split(',')[0].strip())  # Extract longitude and convert to float
+                map_data = pd.DataFrame([[latitude, longitude]], columns=['latitude', 'longitude'])
+                st.map(map_data, zoom=8)
+                st.dataframe(row, width=1000, height=600)
             else:
-                if reduced_data.shape[0] == 1:
-                    # Display the map and data vertically
-                    row = reduced_data.iloc[0]
-                    latitude = float(row['lat'].split(',')[0].strip())  # Extract latitude and convert to float
-                    longitude = float(row['lng'].split(',')[0].strip())  # Extract longitude and convert to float
-                    map_data = pd.DataFrame([[latitude, longitude]], columns=['latitude', 'longitude'])
-                    st.map(map_data, zoom=8)
-                    st.dataframe(row, width=1000, height=600)
-                else:
-                    # Display the data horizontally
-                    for index, row in reduced_data.iterrows():
-                        pcol1, pcol2 = st.columns(2)
-                        with pcol1:
-                            # Display the map
-                            latitude = float(row['lat'].split(',')[0].strip())  # Extract latitude and convert to float
-                            longitude = float(row['lng'].split(',')[0].strip())  # Extract longitude and convert to float
-                            map_data = pd.DataFrame([[latitude, longitude]], columns=['latitude', 'longitude'])
-                            st.map(map_data, zoom=8)
-                            
-                        with pcol2:
-                            st.dataframe(row, width=600, height=400)
+                # Display the data horizontally
+                for index, row in reduced_data.iterrows():
+                    pcol1, pcol2 = st.columns(2)
+                    with pcol1:
+                        # Display the map
+                        latitude = float(row['lat'].split(',')[0].strip())  # Extract latitude and convert to float
+                        longitude = float(row['lng'].split(',')[0].strip())  # Extract longitude and convert to float
+                        map_data = pd.DataFrame([[latitude, longitude]], columns=['latitude', 'longitude'])
+                        st.map(map_data, zoom=8)
+                        
+                    with pcol2:
+                        st.dataframe(row, width=600, height=400)
 
-with tab4:
+with tab5:
     st.header("Settings")
     st.subheader('What type of data do you want to use to filter?')
     
@@ -247,14 +283,14 @@ with tab4:
     
     with col2:
         if st.button('Select Reduced Data'):
-            st.session_state['data_file'] = 'all_predicted_buyers_2024_details.xlsx'
+            st.session_state['data_file'] = 'all_2024_details.xlsx'
             st.session_state['data_selected'] = 'Reduced Data Selected'
             st.rerun()
     
     if 'data_selected' in st.session_state:
         st.success(st.session_state['data_selected'])
 
-with tab5:
+with tab6:
     # st.header("About us")
     st.image("images/lavenir.PNG")
     st.write("L'Avenir Holdings Inc. stands as a beacon in the real estate landscape of Sarasota, Florida, USA. Specializing in the art of property transactions, our expertise spans the spectrum from sprawling lands to cozy apartments, from charming townhouses to luxurious waterfront retreats. \n\nOur dedication lies in crafting seamless experiences for both buyers and sellers, ensuring every transaction is not just a deal, but a journey towards realizing dreams and aspirations. With an unwavering commitment to excellence, we navigate the complexities of the real estate market with finesse, guided by a vision of shaping tomorrow's landscapes today. \n\nAt L'Avenir Holdings Inc., every property is not just a structure; it's a canvas waiting to be adorned with memories and possibilities. Whether it's finding the perfect home to settle into or unlocking the potential of a lucrative investment opportunity, we are the trusted partner guiding you every step of the way. With integrity, innovation, and a passion for the extraordinary, we redefine what it means to turn dreams into reality in the realm of real estate.")
