@@ -198,7 +198,7 @@ with tab1:
             # st.session_state.properties_checkbox = False
             # st.session_state.valuable_goods_checkbox = False
             st.write("Select the type of Vehicle")
-            individual_vehicles = st.checkbox("Individual Vehicle", value=st.session_state.get('individual_vehicle_checkbox', False), key='commercial_vehicle_checkbox', on_change=lambda: update_individual_vehicle_checkbox("Individual Vehicle"))
+            individual_vehicles = st.checkbox("Individual Vehicle", value=st.session_state.get('individual_vehicle_checkbox', False), key='individual_vehicle_checkbox', on_change=lambda: update_individual_vehicle_checkbox("Individual Vehicle"))
             commercial_vehicles = st.checkbox("Commercial Vehicle", value=st.session_state.get('commercial_vehicle_checkbox', False), key='commercial_vehicle_checkbox', on_change=lambda: update_commercial_vehicle_checkbox("Commercial Vehicle"))
             if individual_vehicles:
                 st.session_state.commercial_vehicle_checkbox = False   
