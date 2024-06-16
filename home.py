@@ -179,9 +179,6 @@ with tab1:
             st.checkbox("Valuable Goods", value=st.session_state.get('valuable_goods_checkbox', False), key='valuable_goods_checkbox', on_change=update_valuable_goods_checkbox, args=("Valuable Goods",))
         
         if st.session_state.get('properties_checkbox', False):
-            # st.session_state.vehicle_checkbox = False
-            # st.session_state.valuable_goods_checkbox = False
-
             st.write("Select the type of Properties")
             commercial = st.checkbox("Commercial", value=st.session_state.get('commercial_checkbox', False), key='commercial_checkbox', on_change=lambda: update_commercial_checkbox("Commercial"))
             residential = st.checkbox("Residential", value=st.session_state.get('residential_checkbox', False), key='residential_checkbox', on_change=lambda: update_residential_checkbox("Residential"))
@@ -195,13 +192,10 @@ with tab1:
                 st.warning("Select option from above..")
 
         elif st.session_state.get('vehicle_checkbox', False):
-            # st.session_state.properties_checkbox = False
-            # st.session_state.valuable_goods_checkbox = False
             st.write("Select the type of Vehicle")
             individual_vehicles = st.checkbox("Individual Vehicle", value=st.session_state.get('individual_vehicle_checkbox', False), key='individual_vehicle_checkbox', on_change=lambda: update_individual_vehicle_checkbox("Individual Vehicle"))
             commercial_vehicles = st.checkbox("Commercial Vehicle", value=st.session_state.get('commercial_vehicle_checkbox', False), key='commercial_vehicle_checkbox', on_change=lambda: update_commercial_vehicle_checkbox("Commercial Vehicle"))
             if individual_vehicles:
-                st.session_state.commercial_vehicle_checkbox = False   
                 st.success("You chose Individual Vehicle to filter data")
                 if st.button("Load Data"):
                     filtered_data = filter_data_based_on_county(data, [selected_county])
@@ -211,7 +205,6 @@ with tab1:
                     st.warning("Select option from above..")
 
             elif commercial_vehicles:
-                # st.session_state.individual_vehicle_checkbox = False
                 st.success("You chose Commerical Vehicle to filter data")
                 if st.button("Load Data"):
                     filtered_data = filter_data_based_on_county(data, [selected_county])
@@ -221,9 +214,7 @@ with tab1:
                     st.warning("Select option from above..")
 
         elif st.session_state.get('valuable_goods_checkbox', False):
-            # st.session_state.properties_checkbox = False
-            st.session_state.vehicle_checkbox = False
-            st.success("You chose Commerical Vehicle to filter data")
+            st.success("You chose Valuable Goods to filter data")
             if st.button("Load Data"):
                 filtered_data = filter_data_based_on_county(data, [selected_county])
                 st.success("No Available option for Valuable goods but find Data Loaded below..")
